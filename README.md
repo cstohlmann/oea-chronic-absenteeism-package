@@ -1,11 +1,10 @@
 # Chronic Absenteeism Package
 
-## Introduction of Package
+## Introduction to Package
 ## Problem Statement
 ## Package Impact/Solution
 
 ## Relevant Use-Cases
-## Modules used for Package
 
 ## Package setup
 ## Package components
