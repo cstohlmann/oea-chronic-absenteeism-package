@@ -28,6 +28,14 @@ In general, this package can be used by system or institutional leaders, school,
 
 See below for examples of developed PowerBI dashboards.
 
+#### Out-of-the-Box Dashboards:
+
+Explanation Page | Overview of Chronic Absenteeism | Chronic Absenteeism Drivers
+:-------------------------:|:-------------------------:|:-------------------------:
+![](https://github.com/cstohlmann/oea-chronic-absenteeism-package/blob/main/docs/images/pbi_p0_explanation%20page.png)  |  ![](https://github.com/cstohlmann/oea-chronic-absenteeism-package/blob/main/docs/images/pbi_p1_overview%20of%20chronic%20absenteeism.png) | ![](https://github.com/cstohlmann/oea-chronic-absenteeism-package/blob/main/docs/images/pbi_p2_drivers%20of%20chronic%20absenteeism.png)
+
+#### Modified Production Dashboards: 
+
 Patterns of absenteeism  |  Strongest drivers of model predictions | School support staff dashboard
 :-------------------------:|:-------------------------:|:-------------------------:
 ![](https://github.com/microsoft/OpenEduAnalytics/blob/main/packages/package_catalog/Predicting_Chronic_Absenteeism/docs/images/Chronic%20Absenteeism%20Dashboard%20Overview.png)  |  ![](https://github.com/microsoft/OpenEduAnalytics/blob/main/packages/package_catalog/Predicting_Chronic_Absenteeism/docs/images/Chronic%20Absenteeism%20Drivers%20Dashboard.png) | ![](https://github.com/microsoft/OpenEduAnalytics/blob/main/packages/package_catalog/Predicting_Chronic_Absenteeism/docs/images/Chronic%20Absenteeism%20Social%20Worker%20Dashboard.png)
@@ -41,11 +49,12 @@ Patterns of absenteeism  |  Strongest drivers of model predictions | School supp
 <ins><strong>Preparation:</ins></strong> Ensure you have proper [Azure subscription and credentials](https://github.com/microsoft/OpenEduAnalytics/tree/main/framework) and setup [v0.6.1 of the OEA framework](https://github.com/microsoft/OpenEduAnalytics/tree/main/framework#setup-of-framework-assets). This will include v0.6.1 of the [OEA python class](https://github.com/microsoft/OpenEduAnalytics/blob/main/framework/synapse/notebook/OEA_py.ipynb). Note: This package will be updated to accommodate v0.7. 
 
 1. Examine available data sources. See [below](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism#data-sources) for these related data sources. Choose which modules or data sources to implement.
-    * This package was developed using the following modules: [Contoso SIS](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Student_and_School_Data_Systems), [Microsoft Education Insights](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Microsoft_Education_Insights), [Clever](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Clever), and [i-Ready](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/iReady). 
+    * This package was developed using the following modules: [Contoso SIS](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Student_and_School_Data_Systems), [Microsoft Education Insights](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Microsoft_Education_Insights), and [Clever](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Clever). 
     * Run each of the module test data pipelines to ingest the test data into stage 2. 
 2. Use the [Digital Engagement Schema pipeline](https://github.com/microsoft/OpenEduAnalytics/tree/main/schemas/schema_catalog/Digital_Engagement_Schema/pipeline) and process the compatible modules you choose to ingest. This will combine all digital activity module-tables into a unified table, and creates a single database for the Power BI dashboard. Visit the [Data](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/data) page for a detailed explanation of its use in the PowerBI data model.
 3. Import and run the [Chronic Absenteeism package pipeline template](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/pipelines).
-    * <strong><em>[INSERT MORE DETAILED INSTRUCTIONS FOR THIS STEP]</strong></em>
+    * This step will automatically kick-off the development of the StudentModel table, used to train and test the ML model. The ML model is automatically trained and tested in the second notebook. 
+    * In the second notebook, the top 5 model-determined drivers are identified are pushed to a table, as well as: the true chronic absence flag, the predicted chronic absence flag, the model-dedicated probability of chronic absence for that student, and the model certainty of predictions.
 4. Use the Power BI dashboard to explore predicting Chronic Absenteeism. Note that all pipelines create SQL views which can be accessed via your Synapse workspace serveless SQL endpoint. Example dashboard concepts are [provided in this package](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/powerbi).
       * More detailed information on these queries are provided in the [Power BI folder](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/powerbi#power-bi-setup-instructions). 
 
@@ -53,13 +62,14 @@ Patterns of absenteeism  |  Strongest drivers of model predictions | School supp
 
 The machine learning model learns from past student data to predict if a student will become chronically absent in the future. The model building and assessment is done in 5 main steps:
 
-1. <ins>Data collection:</ins> Select and aggregate data needed to train the model (described below)
+1. <ins>Data collection:</ins> Select and aggregate data needed to train the model (described below).
 2. <ins>Feature engineering:</ins> Use education context to combine and normalize data.
-3. <ins>Model trianing:</ins> [AutoML](https://docs.microsoft.com/en-us/azure/machine-learning/concept-automated-ml) is used to train a best model via [Azure Machine Learning Studio](https://docs.microsoft.com/en-us/azure/machine-learning/overview-what-is-machine-learning-studio). The best model is used to score the training dataset with predictions.
-4. <ins>Model prediction interpretations:</ins> The [AutoML Explainer](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-machine-learning-interpretability-automl) is used to identify which features are most impactful (called key drivers) on the best model predictions.
+3. <ins>Model trianing:</ins> [InterpretML](https://interpret.ml/) is used to train a model. The best model is used to score the training dataset with predictions.
+4. <ins>Model prediction interpretations:</ins> The [InterpretML Explaineinable Boosting Classifier](https://interpret.ml/docs/ebm.html) is used to identify which features are most impactful (called key drivers) on the model predictions.
 5. <ins>Fairness and PowerBI:</ins> Training data, model predictions, and model explanations are combined with other data such as student demographics. The combined data is made ready for PowerBI consumption. PowerBI enables assessment of model quality, analysis of predictions and key drivers, and analysis of model fairness with respect to student demographics.
+     * <strong><em>Important Note:</strong></em> This package does not currently incorporate this, due to lack of test data. <em>It is highly recommended the notebooks are updated to incorporate this data, as well, for production purposes.</em>
 
-See the Chronic Absenteeism Package [Documentation](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/docs) and [Pipelines](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/pipelines) for more details on model building.
+See the Chronic Absenteeism Package [Data page](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/data) for understanding how to deploy this package using test data, [Documentation](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/docs) for details on migrating to production data, and [Pipelines](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Predicting_Chronic_Absenteeism/pipelines) for more details on model building.
 
 ## Data Sources
 
@@ -75,7 +85,8 @@ This package can use several [OEA Modules](https://github.com/microsoft/OpenEduA
 | --- | --- |
 | [Ed-Fi Data Standards](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Ed-Fi) | For typical Student Information System (SIS) data, including detailed student attendance, demographic, digital activity, and academic data. |
 | Microsoft Digital Engagement | Such as M365 [Education Insights](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Microsoft_Education_Insights), or [Microsoft Graph](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Microsoft_Graph) data. |
-| Other Digital Learning Apps and Platforms | [Clever](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Clever) for learning app data and [i-Ready](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/iReady) for language and math assessments and learning activities. |
+| [Clever](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/Clever) | for learning app data |
+| [i-Ready](https://github.com/microsoft/OpenEduAnalytics/tree/main/modules/module_catalog/iReady) | for language and math assessments and learning activities. |
 
 These modules are then combined into single tables based on the types of data contained with them, using the [OEA schemas](https://github.com/microsoft/OpenEduAnalytics/tree/main/schemas) to ingest and transform the module data so that only the relevant columns are extracted from the stage 2 data. Below is the list of relevant OEA schema definitions used in this package.
 
@@ -90,8 +101,8 @@ Assets in the Chronic Absenteeism package include:
 
 1. [Data](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/data): For understanding the data relationships and standardized schema mappings used for certain groups of data.
 2. [Documentation](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/docs): 
-     * [Use Case Documentation](https://github.com/microsoft/OpenEduAnalytics/blob/main/packages/package_catalog/Chronic_Absenteeism/docs/OEA%20Chronic%20Abs%20Package%20-%20Use%20Case%20Doc.pdf)
-     * Resources and documentation for Machine Learning in Azure.
+     * [Use Case Documentation](https://github.com/microsoft/OpenEduAnalytics/blob/main/packages/package_catalog/Chronic_Absenteeism/docs/OEA%20Chronic%20Abs%20Package%20-%20Use%20Case%20Doc.pdf) developed with Fresno Unified School District.
+     * Resources and documentation for Machine Learning in Azure, InterpretML, and Responsible AI implementations.
 3. [Notebooks](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/notebooks): For cleaning, processing, and curating data within the data lake.
 4. [Pipelines](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/pipelines): For an overarching process used to train the machine learning model and support PowerBI dashboards.
 5. [PowerBI](https://github.com/microsoft/OpenEduAnalytics/tree/main/packages/package_catalog/Chronic_Absenteeism/powerbi): For exploring, visualizing, and deriving insights from the data.
