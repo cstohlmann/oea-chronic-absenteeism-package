@@ -65,7 +65,7 @@ The machine learning model learns from past student data to predict if a student
 1. <ins>Data collection:</ins> Select and aggregate data needed to train the model (described below).
 2. <ins>Feature engineering:</ins> Use education context to combine and normalize data.
 3. <ins>Model trianing:</ins> [InterpretML](https://interpret.ml/) is used to train a model. The best model is used to score the training dataset with predictions.
-4. <ins>Model prediction interpretations:</ins> The [InterpretML Explaineinable Boosting Classifier](https://interpret.ml/docs/ebm.html) is used to identify which features are most impactful (called key drivers) on the model predictions.
+4. <ins>Model prediction interpretations:</ins> The [InterpretML Explainable Boosting Classifier](https://interpret.ml/docs/ebm.html) is used to identify which features are most impactful (called key drivers) on the model predictions.
 5. <ins>Fairness and PowerBI:</ins> Training data, model predictions, and model explanations are combined with other data such as student demographics. The combined data is made ready for PowerBI consumption. PowerBI enables assessment of model quality, analysis of predictions and key drivers, and analysis of model fairness with respect to student demographics.
      * <strong><em>Important Note:</strong></em> This package does not currently incorporate this, due to lack of test data. <em>It is highly recommended the notebooks are updated to incorporate this data, as well, for production purposes.</em>
 
